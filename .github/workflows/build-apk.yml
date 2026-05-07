@@ -27,12 +27,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      # Tambahkan flag --yes agar otomatis mengizinkan instalasi Flutter SDK tanpa error EOF
       - name: Build APK
-        run: flet build apk --no-rich-output
+        run: flet build apk --yes --no-rich-output
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: pomodoro-apk
-          path: build/android/outputs/**/*.apk
+          # Path diperbaiki sesuai dengan standar folder output Flet
+          path: build/apk/*.apk 
           retention-days: 7
