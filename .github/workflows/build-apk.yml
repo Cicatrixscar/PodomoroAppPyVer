@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Flet CLI and dependencies
-        run: pip install flet flet-audio
+      - name: Install Flet CLI
+        run: pip install flet
 
       - name: Set up Java (diperlukan Android SDK)
         uses: actions/setup-java@v4

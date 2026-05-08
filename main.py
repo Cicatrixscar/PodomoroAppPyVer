@@ -8,11 +8,6 @@ import sys
 import threading
 import time
 
-try:
-    import flet_audio
-except ImportError:
-    flet_audio = None
-
 from src.constants.theme import (
     PRIMARY_COLOR,
     BG_COLOR,
@@ -65,32 +60,67 @@ async def main(page: ft.Page):
     sessions_today = await get_today_sessions(page)
 
     # ── Audio ─────────────────────────────────────────────
+    # Android: jnius (android.media.MediaPlayer) — direct Java API, no Flutter plugin needed
+    # Windows: winsound — built-in
+    ALARM_FILE = "alarm-voice.mp3"
     stop_alarm_event = threading.Event()
-    
-    if is_mobile() and flet_audio is not None:
-        try:
-            audio_ctrl = flet_audio.Audio(
-                src="alarm.mp3", 
-                autoplay=False, 
-                volume=1.0,
-                release_mode=flet_audio.ReleaseMode.LOOP
-            )
-            page.overlay.append(audio_ctrl)
-            def play_alarm():
+    _android_player = None  # simpan referensi MediaPlayer Android
+
+    if is_mobile():
+        def play_alarm():
+            nonlocal _android_player
+            stop_alarm_event.clear()
+            def _play():
+                nonlocal _android_player
                 try:
-                    audio_ctrl.play()
+                    from jnius import autoclass
+                    MediaPlayer = autoclass("android.media.MediaPlayer")
+                    Context = autoclass("android.content.Context")
+                    PythonActivity = autoclass("org.kivy.android.PythonActivity")
+                    activity = PythonActivity.mActivity
+
+                    # Cari path file alarm di dalam app assets
+                    alarm_file = os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)),
+                        "assets", ALARM_FILE
+                    )
+
+                    # Buat player baru
+                    player = MediaPlayer()
+                    player.setDataSource(alarm_file)
+                    player.setLooping(True)
+                    player.prepare()
+                    player.start()
+                    _android_player = player
+                except Exception as e:
+                    # Fallback: coba RingtoneManager untuk default alarm
+                    try:
+                        from jnius import autoclass
+                        RingtoneManager = autoclass("android.media.RingtoneManager")
+                        Uri = autoclass("android.net.Uri")
+                        PythonActivity = autoclass("org.kivy.android.PythonActivity")
+                        activity = PythonActivity.mActivity
+
+                        uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                        ringtone = RingtoneManager.getRingtone(activity, uri)
+                        ringtone.play()
+                        _android_player = ringtone  # simpan untuk di-stop nanti
+                    except Exception:
+                        pass
+            threading.Thread(target=_play, daemon=True).start()
+
+        def stop_alarm():
+            nonlocal _android_player
+            stop_alarm_event.set()
+            if _android_player is not None:
+                try:
+                    # MediaPlayer punya stop(), Ringtone punya stop()
+                    _android_player.stop()
                 except Exception:
                     pass
-            def stop_alarm():
-                try:
-                    audio_ctrl.pause()
-                except Exception:
-                    pass
-        except ImportError:
-            def play_alarm(): pass
-            def stop_alarm(): pass
+                _android_player = None
     else:
-        alarm_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "alarm.mp3")
+        alarm_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", ALARM_FILE)
         def play_alarm():
             stop_alarm_event.clear()
             def _play():
@@ -98,7 +128,6 @@ async def main(page: ft.Page):
                     if sys.platform == "win32":
                         import winsound
                         try:
-                            # Loop native via SND_LOOP di Windows
                             winsound.PlaySound(alarm_path, winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP)
                         except Exception:
                             while not stop_alarm_event.is_set():
@@ -107,13 +136,12 @@ async def main(page: ft.Page):
                 except Exception:
                     pass
             threading.Thread(target=_play, daemon=True).start()
-            
+
         def stop_alarm():
             stop_alarm_event.set()
             try:
                 if sys.platform == "win32":
                     import winsound
-                    # Hentikan semua suara yang dimainkan secara asinkron
                     winsound.PlaySound(None, winsound.SND_PURGE)
             except Exception:
                 pass
