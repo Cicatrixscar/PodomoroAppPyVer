@@ -27,9 +27,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # Tambahkan flag --yes agar otomatis mengizinkan instalasi Flutter SDK tanpa error EOF
+      # Tambahkan flag --yes dan explicitly include flet_audio
       - name: Build APK
-        run: flet build apk --yes --no-rich-output
+        run: flet build apk --include-packages flet_audio --yes --no-rich-output
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

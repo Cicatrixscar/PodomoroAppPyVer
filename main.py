@@ -52,7 +52,8 @@ async def main(page: ft.Page):
     page.theme = ft.Theme(color_scheme_seed=PRIMARY_COLOR)
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.padding = ft.Padding.symmetric(horizontal=20, vertical=40)
+    page.padding = 0  # Padding dipindah ke dalam SafeArea agar bisa scroll penuh
+    page.scroll = ft.ScrollMode.AUTO
 
     # ── State ─────────────────────────────────────────────
     timer = TimerState()
@@ -378,13 +379,14 @@ async def main(page: ft.Page):
     # LAYOUT
     # ══════════════════════════════════════════════════════
     page.add(
-        ft.Container(
-            expand=True,
-            alignment=ft.Alignment.CENTER,
-            content=ft.Column(
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                spacing=24,
+        ft.SafeArea(
+            ft.Container(
+                alignment=ft.Alignment.CENTER,
+                padding=ft.Padding.symmetric(horizontal=20, vertical=20),
+                content=ft.Column(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=24,
                 controls=[
                     ft.Text("🍅 Pomodoro", size=28, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
                     ft.Container(height=8),
