@@ -1,9 +1,8 @@
-[tool.flet]
-app_id = "com.yourname.pomodoroapp"
-product_name = "Pomodoro"
-description = "Pomodoro timer app"
-version = "1.0.0"
-build_number = 1
-
-[tool.flet.android]
-permissions = ["VIBRATE", "RECEIVE_BOOT_COMPLETED"]
+[project]
+name = "podomoro-app"
+version = "0.1.0"
+description = "Pomodoro Timer App"
+dependencies = [
+    "flet",
+    "flet-audio",
+]

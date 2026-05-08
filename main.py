@@ -8,6 +8,11 @@ import sys
 import threading
 import time
 
+try:
+    import flet_audio
+except ImportError:
+    flet_audio = None
+
 from src.constants.theme import (
     PRIMARY_COLOR,
     BG_COLOR,
@@ -62,14 +67,13 @@ async def main(page: ft.Page):
     # ── Audio ─────────────────────────────────────────────
     stop_alarm_event = threading.Event()
     
-    if is_mobile():
+    if is_mobile() and flet_audio is not None:
         try:
-            from flet_audio import Audio, ReleaseMode
-            audio_ctrl = Audio(
+            audio_ctrl = flet_audio.Audio(
                 src="alarm.mp3", 
                 autoplay=False, 
                 volume=1.0,
-                release_mode=ReleaseMode.LOOP
+                release_mode=flet_audio.ReleaseMode.LOOP
             )
             page.overlay.append(audio_ctrl)
             def play_alarm():
@@ -180,7 +184,7 @@ async def main(page: ft.Page):
         is_sel = mode == timer.current_mode
         color = MODE_COLORS[mode]
         txt = ft.Text(
-            MODE_LABELS[mode], size=13,
+            MODE_LABELS[mode], size=12,
             weight=ft.FontWeight.W_600 if is_sel else ft.FontWeight.W_400,
             color=TEXT_PRIMARY if is_sel else TEXT_SECONDARY,
         )
@@ -188,7 +192,7 @@ async def main(page: ft.Page):
             content=txt,
             bgcolor=color if is_sel else "transparent",
             border_radius=BORDER_RADIUS_LG,
-            padding=ft.Padding.symmetric(horizontal=16, vertical=8),
+            padding=ft.Padding.symmetric(horizontal=10, vertical=8),
             on_click=lambda e, m=mode: on_mode_change(m),
             animate=ft.Animation(200, ft.AnimationCurve.EASE_IN_OUT),
             ink=True,
