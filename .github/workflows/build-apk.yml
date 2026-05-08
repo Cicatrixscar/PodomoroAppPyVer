@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Flet CLI
-        run: pip install flet
+      - name: Install Flet CLI and dependencies
+        run: pip install flet flet-audio
 
       - name: Set up Java (diperlukan Android SDK)
         uses: actions/setup-java@v4
@@ -27,9 +27,9 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # Tambahkan flag --yes dan explicitly include flet_audio
+      # Tambahkan flag --yes agar otomatis mengizinkan instalasi Flutter SDK tanpa error EOF
       - name: Build APK
-        run: flet build apk --include-packages flet_audio --yes --no-rich-output
+        run: flet build apk --yes --no-rich-output
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
