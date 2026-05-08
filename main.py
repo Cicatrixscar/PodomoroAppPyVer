@@ -380,25 +380,26 @@ async def main(page: ft.Page):
     # ══════════════════════════════════════════════════════
     page.add(
         ft.SafeArea(
-            ft.Container(
+            content=ft.Container(
                 alignment=ft.Alignment.CENTER,
                 padding=ft.Padding.symmetric(horizontal=20, vertical=20),
                 content=ft.Column(
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     spacing=24,
-                controls=[
-                    ft.Text("🍅 Pomodoro", size=28, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
-                    ft.Container(height=8),
-                    mode_row,
-                    ft.Container(height=8),
-                    timer_display,
-                    ft.Container(height=16),
-                    controls_row,
-                    ft.Container(height=16),
-                    stats_card,
-                ],
-            ),
+                    controls=[
+                        ft.Text("🍅 Pomodoro", size=28, weight=ft.FontWeight.BOLD, color=TEXT_PRIMARY),
+                        ft.Container(height=8),
+                        mode_row,
+                        ft.Container(height=8),
+                        timer_display,
+                        ft.Container(height=16),
+                        controls_row,
+                        ft.Container(height=16),
+                        stats_card,
+                    ],
+                )
+            )
         )
     )
 
