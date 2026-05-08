@@ -6,3 +6,7 @@ dependencies = [
     "flet",
     "flet-audio",
 ]
+
+[tool.flet]
+product = "Pomodoro"
+org = "com.podomoro"
